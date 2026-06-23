@@ -75,7 +75,7 @@ for k, v in dict(suhu_hpc=1589.0, suhu_lpt=1400.0,
 
 # ── TOP BAR ──
 st.markdown("""
-<div style="background:#16181e;border-bottom:1px solid #2d3139;padding:14px 28px;
+<div style="background:#3b3580;border-bottom:1px solid #2d2870;padding:14px 28px;
             display:flex;align-items:center;justify-content:space-between;">
   <div>
     <span style="font-size:17px;font-weight:700;color:#e2e8f0;font-family:'Inter',sans-serif;">

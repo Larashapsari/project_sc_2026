@@ -20,8 +20,8 @@ header[data-testid="stHeader"] { display: none !important; }
 [data-testid="stSidebar"] { display: none !important; }
 [data-testid="collapsedControl"] { display: none !important; }
 
-div[data-testid="stNumberInput"] label { display: none !important; }
-div[data-testid="stNumberInput"] input {
+div[data-testid="stTextInput"] label { display: none !important; }
+div[data-testid="stTextInput"] input {
     background: #2a2d35 !important;
     border: 1px solid #3d4350 !important;
     border-radius: 6px !important;
@@ -31,11 +31,11 @@ div[data-testid="stNumberInput"] input {
     font-weight: 600 !important;
     text-align: center !important;
 }
-div[data-testid="stNumberInput"] input:focus {
+div[data-testid="stTextInput"] input:focus {
     border-color: #6c63ff !important;
     box-shadow: 0 0 0 2px rgba(108,99,255,0.25) !important;
+    outline: none !important;
 }
-div[data-testid="stNumberInput"] button { display: none !important; }
 
 .stButton > button {
     background: transparent !important;
@@ -127,17 +127,17 @@ with inp_col:
     </div>""", unsafe_allow_html=True)
 
     sensors = [
-        ("suhu_hpc",        "Suhu HPC",           "HP Compressor outlet",   "°C"),
-        ("suhu_lpt",        "Suhu LPT",            "LP Turbine outlet",      "°C"),
-        ("rasio_tekanan",   "Rasio tekanan",        "Overall pressure ratio", ""),
-        ("tekanan_ruang",   "Tekanan ruang bakar",  "Combustion chamber",     ""),
-        ("rasio_bbm",       "Rasio aliran BBM",     "Fuel flow to pressure",  ""),
-        ("kecepatan_poros", "Kecepatan poros",      "Core shaft speed",       ""),
+        ("suhu_hpc",        "Suhu HPC",           "HP Compressor outlet",   "°C",  "1589.0"),
+        ("suhu_lpt",        "Suhu LPT",            "LP Turbine outlet",      "°C",  "1400.0"),
+        ("rasio_tekanan",   "Rasio tekanan",        "Overall pressure ratio", "",    "9046.0"),
+        ("tekanan_ruang",   "Tekanan ruang bakar",  "Combustion chamber",     "",    "47.4"),
+        ("rasio_bbm",       "Rasio aliran BBM",     "Fuel flow to pressure",  "",    "521.6"),
+        ("kecepatan_poros", "Kecepatan poros",      "Core shaft speed",       "",    "8138.0"),
     ]
 
     for i in range(0, len(sensors), 2):
         c1, c2 = st.columns(2, gap="medium")
-        for col, (key, title, sub, unit) in zip([c1, c2], sensors[i:i+2]):
+        for col, (key, title, sub, unit, default) in zip([c1, c2], sensors[i:i+2]):
             with col:
                 with st.container():
                     t1, t2 = st.columns([3, 1])
@@ -155,11 +155,19 @@ with inp_col:
                                 unsafe_allow_html=True,
                             )
                     st.caption(sub)
-                    st.number_input(
-                        label=title, key=key,
-                        format="%.1f", step=1.0,
+                    # Gunakan key berbeda untuk text_input agar tidak bentrok dengan session_state float
+                    txt_key = key + "_txt"
+                    if txt_key not in st.session_state:
+                        st.session_state[txt_key] = default
+                    val = st.text_input(
+                        label=title,
+                        key=txt_key,
                         label_visibility="collapsed",
                     )
+                    try:
+                        st.session_state[key] = float(val.replace(",", "."))
+                    except Exception:
+                        st.session_state[key] = float(default)
 
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     _, bc, __ = st.columns([0.01, 0.42, 0.57])

@@ -14,12 +14,9 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
-
 .stApp { background-color: #1e2128 !important; color: #d4dbe8 !important; font-family: 'Inter', sans-serif !important; }
 header[data-testid="stHeader"] { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
-
-/* Sembunyikan sidebar sepenuhnya */
 [data-testid="stSidebar"] { display: none !important; }
 [data-testid="collapsedControl"] { display: none !important; }
 
@@ -50,6 +47,22 @@ div[data-testid="stNumberInput"] button { display: none !important; }
     padding: 10px 28px !important;
 }
 .stButton > button:hover { background: #6c63ff !important; border-color: #6c63ff !important; color: #fff !important; }
+
+/* Nav pill aktif */
+.nav-active {
+    background: #6c63ff;
+    border: 1px solid #6c63ff;
+    padding: 6px 18px;
+    border-radius: 6px;
+    display: inline-block;
+}
+.nav-inactive {
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 6px 18px;
+    border-radius: 6px;
+    display: inline-block;
+}
 
 #MainMenu, footer { visibility: hidden; }
 </style>
@@ -82,7 +95,7 @@ for k, v in dict(suhu_hpc=1589.0, suhu_lpt=1400.0,
 st.markdown("""
 <div style="background:#3b3580;border-bottom:1px solid #2d2870;padding:14px 28px;
             display:flex;align-items:center;justify-content:space-between;">
-  <div style="display:flex;align-items:center;gap:32px;">
+  <div style="display:flex;align-items:center;gap:24px;">
     <span style="font-size:17px;font-weight:700;color:#fff;font-family:'Inter',sans-serif;">
       ⚙️&nbsp; Predictive Maintenance
     </span>
@@ -98,35 +111,47 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── NAV BAR (horizontal, bukan sidebar) ──
-pages = [("Dashboard", True), ("Riwayat", False), ("Tren sensor", False), ("Laporan", False)]
-nav_items = ""
-for label, active in pages:
-    bg  = "#6c63ff" if active else "transparent"
-    clr = "#fff"    if active else "#8a95a5"
-    brd = "1px solid #6c63ff" if active else "1px solid transparent"
-    nav_items += f"""
-    <div style="background:{bg};border:{brd};padding:6px 18px;border-radius:6px;cursor:pointer;">
-      <span style="color:{clr};font-size:13px;font-weight:{'600' if active else '400'};
-                   font-family:'Inter',sans-serif;">{label}</span>
-    </div>"""
-
-st.markdown(f"""
-<div style="background:#16181e;border-bottom:1px solid #2d3139;
-            padding:10px 28px;display:flex;align-items:center;gap:8px;">
-  <span style="font-size:10px;letter-spacing:.12em;color:#565e70;
-               font-weight:600;margin-right:12px;font-family:'Inter',sans-serif;">MENU</span>
-  {nav_items}
+# ── NAV BAR — pakai st.columns, BUKAN f-string HTML ──
+st.markdown("""
+<div style="background:#16181e;border-bottom:1px solid #2d3139;padding:8px 28px;">
 </div>
 """, unsafe_allow_html=True)
 
-# ── 2 KOLOM UTAMA: input | hasil ──
+pages = ["Dashboard", "Riwayat", "Tren sensor", "Laporan"]
+active_page = st.session_state.get("active_page", "Dashboard")
+
+nav_cols = st.columns([0.15, 1, 1, 1, 1, 4])
+with nav_cols[0]:
+    st.markdown(
+        "<p style='margin:6px 0 0 0;font-size:10px;letter-spacing:.12em;color:#565e70;"
+        "font-weight:600;font-family:Inter,sans-serif;white-space:nowrap;'>MENU</p>",
+        unsafe_allow_html=True
+    )
+
+for col, label in zip(nav_cols[1:5], pages):
+    with col:
+        is_active = (label == active_page)
+        bg  = "#6c63ff" if is_active else "transparent"
+        clr = "#fff"    if is_active else "#8a95a5"
+        fw  = "600"     if is_active else "400"
+        brd = "#6c63ff" if is_active else "transparent"
+        st.markdown(
+            f"<div style='background:{bg};border:1px solid {brd};padding:5px 14px;"
+            f"border-radius:6px;text-align:center;margin-top:2px;'>"
+            f"<span style='color:{clr};font-size:13px;font-weight:{fw};"
+            f"font-family:Inter,sans-serif;'>{label}</span></div>",
+            unsafe_allow_html=True
+        )
+
+st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+# ── 2 KOLOM UTAMA ──
 inp_col, res_col = st.columns([2.2, 1.4])
 
 # ── INPUT PANEL ──
 with inp_col:
     st.markdown("""
-    <div style="padding:20px 8px 10px;">
+    <div style="padding:12px 8px 10px;">
       <span style="font-size:10px;letter-spacing:.14em;color:#565e70;
                    font-family:'JetBrains Mono',monospace;font-weight:600;">
         // INPUT SENSOR TELEMETRI
@@ -183,7 +208,7 @@ with inp_col:
 # ── RESULT PANEL ──
 with res_col:
     st.markdown("""
-    <div style="padding:20px 8px 10px;">
+    <div style="padding:12px 8px 10px;">
       <span style="font-size:10px;letter-spacing:.14em;color:#565e70;
                    font-family:'JetBrains Mono',monospace;font-weight:600;">
         // HASIL PREDIKSI
@@ -192,7 +217,7 @@ with res_col:
 
     if st.session_state.result is None:
         st.markdown("""
-        <div style="margin:30px 8px 0;background:#252830;border:1px dashed #2d3139;
+        <div style="margin:20px 8px 0;background:#252830;border:1px dashed #2d3139;
                     border-radius:10px;padding:56px 20px;text-align:center;">
           <div style="font-size:30px;opacity:.3;margin-bottom:12px;">📊</div>
           <div style="font-size:11px;color:#565e70;line-height:1.7;">
@@ -205,50 +230,45 @@ with res_col:
         lbl, clr, ratio = health_label(rul)
         bw = int(ratio * 100)
 
-        rows = "".join(f"""
-        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #2d3139;">
-          <span style="font-size:11px;color:#565e70;font-family:'JetBrains Mono',monospace;">{k}</span>
-          <span style="font-size:11px;color:#c8d0de;font-weight:600;font-family:'JetBrains Mono',monospace;">{v}</span>
-        </div>""" for k, v in [
-            ("T_HPC",   f"{st.session_state.suhu_hpc:.1f} °C"),
-            ("T_LPT",   f"{st.session_state.suhu_lpt:.1f} °C"),
-            ("P_ratio", f"{st.session_state.rasio_tekanan:.1f}"),
-            ("P_comb",  f"{st.session_state.tekanan_ruang:.1f}"),
-            ("FF/P",    f"{st.session_state.rasio_bbm:.1f}"),
-            ("N_core",  f"{st.session_state.kecepatan_poros:.1f}"),
-        ])
+        rows = "".join(
+            f"<div style='display:flex;justify-content:space-between;padding:5px 0;"
+            f"border-bottom:1px solid #2d3139;'>"
+            f"<span style='font-size:11px;color:#565e70;font-family:JetBrains Mono,monospace;'>{k}</span>"
+            f"<span style='font-size:11px;color:#c8d0de;font-weight:600;font-family:JetBrains Mono,monospace;'>{v}</span>"
+            f"</div>"
+            for k, v in [
+                ("T_HPC",   f"{st.session_state.suhu_hpc:.1f} °C"),
+                ("T_LPT",   f"{st.session_state.suhu_lpt:.1f} °C"),
+                ("P_ratio", f"{st.session_state.rasio_tekanan:.1f}"),
+                ("P_comb",  f"{st.session_state.tekanan_ruang:.1f}"),
+                ("FF/P",    f"{st.session_state.rasio_bbm:.1f}"),
+                ("N_core",  f"{st.session_state.kecepatan_poros:.1f}"),
+            ]
+        )
 
-        st.markdown(f"""
-        <div style="margin:0 8px;">
-          <div style="background:#252830;border:1px solid #2d3139;border-radius:10px;
-                      padding:20px 18px;margin-bottom:12px;">
-            <div style="font-size:10px;letter-spacing:.1em;color:#565e70;
-                        font-family:'JetBrains Mono',monospace;margin-bottom:8px;">
-              ESTIMASI SISA UMUR (RUL)
-            </div>
-            <div style="display:flex;align-items:baseline;gap:8px;">
-              <span style="font-size:44px;font-weight:700;color:{clr};
-                           font-family:'JetBrains Mono',monospace;line-height:1;">{rul}</span>
-              <span style="font-size:13px;color:#8a95a5;">siklus</span>
-            </div>
-            <div style="background:#1e2128;border-radius:4px;height:6px;margin:14px 0 8px;overflow:hidden;">
-              <div style="background:{clr};width:{bw}%;height:100%;border-radius:4px;"></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:10px;color:#565e70;">Kondisi mesin</span>
-              <span style="background:{clr}22;color:{clr};font-size:10px;font-weight:700;
-                           padding:2px 10px;border-radius:20px;
-                           font-family:'JetBrains Mono',monospace;">{lbl}</span>
-            </div>
-          </div>
-          <div style="background:#252830;border:1px solid #2d3139;border-radius:10px;padding:14px 16px;">
-            <div style="font-size:10px;letter-spacing:.1em;color:#565e70;
-                        font-family:'JetBrains Mono',monospace;margin-bottom:10px;">
-              NILAI SENSOR INPUT
-            </div>
-            {rows}
-          </div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(
+            f"<div style='margin:0 8px;'>"
+            f"<div style='background:#252830;border:1px solid #2d3139;border-radius:10px;"
+            f"padding:20px 18px;margin-bottom:12px;'>"
+            f"<div style='font-size:10px;letter-spacing:.1em;color:#565e70;"
+            f"font-family:JetBrains Mono,monospace;margin-bottom:8px;'>ESTIMASI SISA UMUR (RUL)</div>"
+            f"<div style='display:flex;align-items:baseline;gap:8px;'>"
+            f"<span style='font-size:44px;font-weight:700;color:{clr};"
+            f"font-family:JetBrains Mono,monospace;line-height:1;'>{rul}</span>"
+            f"<span style='font-size:13px;color:#8a95a5;'>siklus</span></div>"
+            f"<div style='background:#1e2128;border-radius:4px;height:6px;margin:14px 0 8px;overflow:hidden;'>"
+            f"<div style='background:{clr};width:{bw}%;height:100%;border-radius:4px;'></div></div>"
+            f"<div style='display:flex;justify-content:space-between;align-items:center;'>"
+            f"<span style='font-size:10px;color:#565e70;'>Kondisi mesin</span>"
+            f"<span style='background:{clr}22;color:{clr};font-size:10px;font-weight:700;"
+            f"padding:2px 10px;border-radius:20px;font-family:JetBrains Mono,monospace;'>{lbl}</span>"
+            f"</div></div>"
+            f"<div style='background:#252830;border:1px solid #2d3139;border-radius:10px;padding:14px 16px;'>"
+            f"<div style='font-size:10px;letter-spacing:.1em;color:#565e70;"
+            f"font-family:JetBrains Mono,monospace;margin-bottom:10px;'>NILAI SENSOR INPUT</div>"
+            f"{rows}</div></div>",
+            unsafe_allow_html=True
+        )
 
 # ── FOOTER ──
 st.markdown("""

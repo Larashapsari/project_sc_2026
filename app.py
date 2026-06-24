@@ -111,38 +111,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── NAV BAR — pakai st.columns, BUKAN f-string HTML ──
-st.markdown("""
-<div style="background:#16181e;border-bottom:1px solid #2d3139;padding:8px 28px;">
-</div>
-""", unsafe_allow_html=True)
-
-pages = ["Dashboard", "Riwayat", "Tren sensor", "Laporan"]
-active_page = st.session_state.get("active_page", "Dashboard")
-
-nav_cols = st.columns([0.15, 1, 1, 1, 1, 4])
-with nav_cols[0]:
-    st.markdown(
-        "<p style='margin:6px 0 0 0;font-size:10px;letter-spacing:.12em;color:#565e70;"
-        "font-weight:600;font-family:Inter,sans-serif;white-space:nowrap;'>MENU</p>",
-        unsafe_allow_html=True
-    )
-
-for col, label in zip(nav_cols[1:5], pages):
-    with col:
-        is_active = (label == active_page)
-        bg  = "#6c63ff" if is_active else "transparent"
-        clr = "#fff"    if is_active else "#8a95a5"
-        fw  = "600"     if is_active else "400"
-        brd = "#6c63ff" if is_active else "transparent"
-        st.markdown(
-            f"<div style='background:{bg};border:1px solid {brd};padding:5px 14px;"
-            f"border-radius:6px;text-align:center;margin-top:2px;'>"
-            f"<span style='color:{clr};font-size:13px;font-weight:{fw};"
-            f"font-family:Inter,sans-serif;'>{label}</span></div>",
-            unsafe_allow_html=True
-        )
-
 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
 # ── 2 KOLOM UTAMA ──

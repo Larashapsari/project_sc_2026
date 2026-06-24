@@ -20,21 +20,38 @@ header[data-testid="stHeader"] { display: none !important; }
 [data-testid="stSidebar"] { display: none !important; }
 [data-testid="collapsedControl"] { display: none !important; }
 
-div[data-testid="stTextInput"] label { display: none !important; }
-div[data-testid="stTextInput"] input {
+div[data-testid="stNumberInput"] label { display: none !important; }
+div[data-testid="stNumberInput"] input {
     background: #2a2d35 !important;
     border: 1px solid #3d4350 !important;
-    border-radius: 6px !important;
+    border-radius: 6px 0 0 6px !important;
     color: #e2e8f0 !important;
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 15px !important;
     font-weight: 600 !important;
     text-align: center !important;
 }
-div[data-testid="stTextInput"] input:focus {
+div[data-testid="stNumberInput"] input:focus {
     border-color: #6c63ff !important;
     box-shadow: 0 0 0 2px rgba(108,99,255,0.25) !important;
     outline: none !important;
+}
+div[data-testid="stNumberInput"] button {
+    background: #3a3d4a !important;
+    border: 1px solid #3d4350 !important;
+    color: #c8d0de !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 100% !important;
+    cursor: pointer !important;
+    transition: background .15s ease !important;
+}
+div[data-testid="stNumberInput"] button:hover {
+    background: #6c63ff !important;
+    border-color: #6c63ff !important;
+    color: #fff !important;
 }
 
 .stButton > button {
@@ -155,19 +172,14 @@ with inp_col:
                                 unsafe_allow_html=True,
                             )
                     st.caption(sub)
-                    # Gunakan key berbeda untuk text_input agar tidak bentrok dengan session_state float
-                    txt_key = key + "_txt"
-                    if txt_key not in st.session_state:
-                        st.session_state[txt_key] = default
-                    val = st.text_input(
+                    st.number_input(
                         label=title,
-                        key=txt_key,
+                        key=key,
+                        value=float(default),
+                        format="%.1f",
+                        step=1.0,
                         label_visibility="collapsed",
                     )
-                    try:
-                        st.session_state[key] = float(val.replace(",", "."))
-                    except Exception:
-                        st.session_state[key] = float(default)
 
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     _, bc, __ = st.columns([0.01, 0.42, 0.57])
